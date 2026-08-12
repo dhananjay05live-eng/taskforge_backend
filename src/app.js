@@ -1,12 +1,14 @@
 import express from "express"
+
+
 const app = express()
 
-app.get('/',(req,res)=>{
-    res.send({"message":"taskforce is alive"})
-})
+app.use(express.json())
 
-app.listen(process.env.PORT||8000,()=>{
-    console.log(`express app is listening `)
-})
+
+import { taskrouter } from "./router/task.router.js"
+
+// task routes
+app.use('/api/v1/tasks',taskrouter);
 
 export {app}
