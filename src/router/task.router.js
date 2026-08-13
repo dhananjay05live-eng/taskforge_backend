@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { addNewTask } from "../controller/task.controller.js";
+import { addNewTask, mycurrentTask } from "../controller/task.controller.js";
 
 const taskrouter = Router();
 
 
 taskrouter.route('/newtask').post(addNewTask)
+
+taskrouter.route('/mytask').get(mycurrentTask)
 
 
 
