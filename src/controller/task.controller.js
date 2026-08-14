@@ -62,5 +62,72 @@ try {
    }
 }
 
+const thistask  = async(req,res)=>{
+   try {
+      const thistask = await Task.findById(req.params.id);
 
-export {addNewTask,mycurrentTask}
+      if(thistask === null){
+         return res.status(200)
+            .json({"message":"task does not exist"})
+         
+      }
+      return res
+      .status(200)
+      .json({"message":"task retrival successful",
+         "task":thistask
+      })
+   } catch (error) {
+      console.log("could not find the task",error)
+      return res.status(500)
+      .json({"error message":error})
+   }
+
+}
+
+const updateTaskStatus = async (req,res)=>{
+   try {
+      const {status} = req.body;
+      const update = {status};
+      const new_status =await Task.findByIdAndUpdate(req.params.id,update, {new:true});
+
+      return res.status(200)
+               .json({"message":"task updated successfully",
+                  "status":new_status
+               })
+   } catch (error) {
+      console.log("status updation failed",error);
+
+      return res
+         .status(400)
+         .json({"message":"problem in status updation"})
+   }
+}
+
+const deleteTask = async(req,res)=>{
+
+try {
+      const id = req.params.id;
+      const deletedTask = await Task.findByIdAndDelete(id);
+
+      if (deletedTask === null) {
+         return res
+             .status(404)
+             .json({
+                 "message": "task not found"
+             });
+     }
+
+      return res.status(200)
+                  .json({"message":"task deleted successfully",
+                     "deleted":deletedTask
+                  })
+} catch (error) {
+   return res.status(500)
+               .json({"message":"could not delete task",
+                  "error":error
+               })
+}
+}
+
+
+export {addNewTask,mycurrentTask,thistask,updateTaskStatus,deleteTask}
