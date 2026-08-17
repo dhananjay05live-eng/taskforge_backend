@@ -1,4 +1,5 @@
 import { User } from "../models/users.models.js";
+import {generateAccessToken,generateRefreshToken} from "../utils/token.js"
 
 
 
@@ -54,5 +55,65 @@ try {
 
 }
 
+const userLogin  = async(req,res)=>{
 
-export {registerUser};
+    const {email,username,password} = req.body;
+
+    if(!email && !username){
+        return res
+                .status(400)
+                .json({"message":"Bad request!,email or username is required"})
+    }
+
+    const user = await User.findOne({
+        $or:[{username},{email}]
+    }).select("+password")
+
+    if(user===null){
+        return res
+                .status(400)
+                .json({"message":"user does not exists"})
+    }
+
+    if(!password){
+        return res
+                .status(400)
+                .json({"message":"password is required field"})
+    }
+
+    const isCorrect = await user.isPasswordCorrect(password);
+    if(!isCorrect){
+        return res
+                .status(400)
+                .json({"message":"invalid credentials!"})
+    }
+
+try {
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
+        await User.findByIdAndUpdate(
+            user._id,
+            { refreshToken }
+        );
+        return res
+                .status(200)
+                .cookie('accessToken',accessToken,{
+                    httpOnly:true,
+                    secure:false
+                })
+                .cookie("refreshToken", refreshToken, {
+                    httpOnly: true,
+                    secure: false
+                })
+                .json({
+                    "message":"login successful"
+                })
+    } catch (error) {
+    return res.status(500)
+                .json({"message":"login failed"})
+}
+
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+
+
+export {registerUser,userLogin};
