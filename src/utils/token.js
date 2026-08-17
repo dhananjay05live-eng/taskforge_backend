@@ -15,13 +15,5 @@ const generateAccessToken = (user)=>{
       return accessToken;
 }
 
-const verifyjwt = (token)=>{
-    try {
-        const decoded  = jwt.verify(token,process.env.REFRESH_TOKEN_SECRET)
-        return decoded;
-    } catch (error) {
-        console.log("verification failed!",error)
-    }
-}
 
 export {generateAccessToken,generateRefreshToken}
