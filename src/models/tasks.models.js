@@ -29,6 +29,11 @@ const taskSchema = new mongoose.Schema(
             type: Date,
             required:true,
             default: Date
+        },
+        owner:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"User",
+            required:true
         }
     },
     {

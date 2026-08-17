@@ -1,4 +1,5 @@
 import { Task } from "../models/tasks.models.js";
+import { User } from "../models/users.models.js";
 
 
 
@@ -6,7 +7,8 @@ import { Task } from "../models/tasks.models.js";
 const addNewTask = async(req,res)=>{
    try {
      const {title,description,status,priority,dueDate} =  req.body
-     const new_task =  await Task.create({title:title,description:description,status:status,priority:priority,dueDate:dueDate});
+     const owner = req.user._id;
+     const new_task =  await Task.create({title:title,description:description,status:status,priority:priority,dueDate:dueDate,owner:owner});
 
      return res
      .status(201)
@@ -26,6 +28,8 @@ const addNewTask = async(req,res)=>{
 const mycurrentTask = async(req,res)=>{
 
 try {
+
+   const filter = {owner:req.user._id};
    let {date,priority,status} = req.query;
 
    if (!date) {
@@ -36,7 +40,8 @@ try {
       const startOfNextDay = new Date(startOfDay);
       startOfNextDay.setDate(startOfNextDay.getDate()+1);
 
-      const filter = {dueDate:{$gte:startOfDay,$lt:startOfNextDay}};
+      filter.dueDate = {$gte:startOfDay,$lt:startOfNextDay};
+
 
       if(priority){
          filter.priority = priority;
@@ -76,7 +81,8 @@ try {
 
 const thistask  = async(req,res)=>{
    try {
-      const thistask = await Task.findById(req.params.id);
+      const thistask = await Task.findOne({owner:req.user._id,
+       _id:req.params.id});
 
       if(thistask === null){
          return res.status(200)
@@ -99,8 +105,8 @@ const thistask  = async(req,res)=>{
 const deleteTask = async(req,res)=>{
 
 try {
-      const id = req.params.id;
-      const deletedTask = await Task.findByIdAndDelete(id);
+      const deletedTask = await Task.findOneAndDelete({owner:req.user._id,
+       _id:req.params.id});
 
       if (deletedTask === null) {
          return res
@@ -138,7 +144,16 @@ try {
                   .json({"message":"no updates recieved"})
    
       }
-      const updatedTask = await Task.findOneAndUpdate( {_id: req.params.id},update,{ returnDocument: "after" });
+      const updatedTask = await Task.findOneAndUpdate( {owner:req.user._id,
+         _id: req.params.id},update,{ returnDocument: "after" });
+
+         if (!updatedTask) {
+            return res
+                .status(404)
+                .json({
+                    message: "Task not found"
+                });
+        }
    
       return res
                .status(200)
