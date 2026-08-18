@@ -113,7 +113,42 @@ try {
                 .json({"message":"login failed"})
 }
 
-}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+}
+
+const logoutUser = async (req, res) => {
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+
+        if (refreshToken) {
+            try {
+                const decoded = jwt.verify(
+                    refreshToken,
+                    process.env.REFRESH_TOKEN_SECRET
+                );
+
+                await User.findByIdAndUpdate(
+                    decoded._id,
+                    { $unset: { refreshToken: 1 } }
+                );
+            } catch (error) {
+            }
+        }
+
+        return res
+            .clearCookie("accessToken")
+            .clearCookie("refreshToken")
+            .status(200)
+            .json({
+                message: "Logged out successfully"
+            });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Logout failed",
+            error: error.message
+        });
+    }
+};
 
 
-export {registerUser,userLogin};
+export {registerUser,userLogin,logoutUser};

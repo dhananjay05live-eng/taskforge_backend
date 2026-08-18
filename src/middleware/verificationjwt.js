@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const verifyJWT = (req, res, next) => {
+const verifyAccess = (req, res, next) => {
     try {
         const token = req.cookies?.accessToken;
 
@@ -28,4 +28,32 @@ const verifyJWT = (req, res, next) => {
     }
 };
 
-export {verifyJWT}
+
+export const verifyRefreshToken = async (req, res, next) => {
+    try {
+        const token = req.cookies?.refreshToken;
+
+        if (!token) {
+            return res.status(401).json({
+                message: "Refresh token required"
+            });
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.REFRESH_TOKEN_SECRET
+        );
+
+        req.user = decoded;
+
+        next();
+
+    } catch (error) {
+        return res.status(401).json({
+            message: "Invalid or expired refresh token",
+            error: error.message
+        });
+    }
+};
+
+export {verifyAccess,verifyRefreshToken}

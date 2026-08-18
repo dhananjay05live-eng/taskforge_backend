@@ -1,19 +1,19 @@
 import { Router } from "express";
 import { addNewTask, mycurrentTask, thistask,deleteTask, editTask } from "../controller/task.controller.js";
-import { verifyJWT } from "../middleware/verificationjwt.js";
+import { verifyAccess,verifyRefreshToken } from "../middleware/verificationjwt.js";
 
 const taskrouter = Router();
 
 
-taskrouter.route('/newtask').post(verifyJWT,addNewTask)
+taskrouter.route('/newtask').post(verifyAccess,addNewTask)
 
 
 //SECURED ROUTES
 
-taskrouter.route('/mytask').get(verifyJWT,mycurrentTask)
-taskrouter.route('/:id').get(verifyJWT,thistask)
-                        .patch(verifyJWT,editTask)
-                        .delete(verifyJWT,deleteTask)
+taskrouter.route('/mytask').get(verifyAccess,mycurrentTask)
+taskrouter.route('/:id').get(verifyAccess,thistask)
+                        .patch(verifyAccess,editTask)
+                        .delete(verifyAccess,deleteTask)
 
 
 export {taskrouter}
